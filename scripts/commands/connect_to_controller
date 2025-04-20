@@ -1,0 +1,4 @@
+#!/bin/bash 
+set -e
+
+connect_to_node 115

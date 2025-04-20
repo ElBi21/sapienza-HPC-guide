@@ -1,0 +1,67 @@
+- name: Restart Slurm daemons on all nodes
+  hosts:
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  - name: Set slurm user uid correctly
+    shell:
+      cmd: sudo usermod -u 1217 slurm
+    ignore_errors: true
+  - name: Set slurm user uid correctly (part 2)
+    shell:
+      cmd: sudo usermod -u 1217 slurm
+    ignore_errors: true
+  - name: Gets user id
+    shell: "id -u slurm"
+    register: uid
+  - name: Asserts that the uid is correct
+    assert:
+      that:
+      - uid.stdout == "1217"
+  - name: Disable Slurm daemon on all nodes
+    systemd_service:
+      name: "{{ item }}"
+      enabled: false
+      state: stopped
+      daemon-reload: true
+    loop:
+    - slurmd
+    - slurmctld
+    - slurmdbd 
+    ignore_errors: true
+  - name: Enable Slurm daemon on controller nodes
+    systemd_service:
+      name: slurmctld
+      enabled: true
+      state: restarted
+      daemon-reload: true
+    when: inventory_hostname in groups['controller_nodes']
+  - name: Enable Slurm daemon on db nodes
+    systemd_service:
+      name: slurmdbd
+      enabled: true
+      state: restarted
+      daemon-reload: true
+    when: inventory_hostname in groups['db_nodes']
+  - name: Enable Slurm daemon on compute nodes
+    systemd_service:
+      name: slurmd
+      enabled: true
+      state: restarted
+      daemon-reload: true
+    when: inventory_hostname in groups['compute_nodes']
+  - name: Reconfigure Slurm for changes to take effect
+    shell:
+      cmd: scontrol reconfigure
+  - name: Gets hostname
+    shell: hostname
+    register: hostname
+  - name: Put the node to IDLE state
+    shell:
+      cmd: |
+        scontrol update NodeName="{{ hostname.stdout }}" State=IDLE
+  

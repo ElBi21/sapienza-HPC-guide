@@ -1,0 +1,6 @@
+#!/bin/bash 
+set -e
+
+NODE_NAME=$1
+
+ssh guest@192.168.0.$NODE_NAME

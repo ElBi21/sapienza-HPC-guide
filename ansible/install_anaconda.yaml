@@ -1,0 +1,69 @@
+- name: Install Anaconda on all nodes
+  hosts:
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  - name: Checks if Anaconda is already installed
+    shell:
+      cmd: export PATH=/etc/anaconda3/bin:$PATH && conda list
+    register: conda_list
+    ignore_errors: true
+
+  - name: Download Anaconda
+    get_url:
+      url: https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh
+      dest: /tmp/Anaconda3-2024.10-1-Linux-x86_64.sh
+      force: true
+    when: conda_list.rc != 0
+  - name: Install Anaconda
+    shell:
+      cmd: bash /tmp/Anaconda3-2024.10-1-Linux-x86_64.sh -bu -p /etc/anaconda3
+    when: conda_list.rc != 0
+  - name: Clean-up the installer
+    shell:
+      cmd: rm -rf /tmp/Anaconda*
+    when: conda_list.rc != 0
+  - name: Enable read for all
+    file:
+      path: /etc/anaconda3
+      mode: +r
+      recurse: yes
+    when: conda_list.rc != 0
+  - name: Enable read and write for shared package cache for all
+    file:
+      path: /home/guest/conda_pkgs
+      mode: u+rwx,g+rwx,o+rwx
+      recurse: yes
+      state: directory
+    # when: conda_list.rc != 0
+  - name: Enable execution for all
+    file:
+      path: /etc/anaconda3/bin
+      mode: +x
+      recurse: yes
+    when: conda_list.rc != 0
+  - name: Initialize conda
+    shell:
+      cmd: export PATH=/etc/anaconda3/bin:$PATH && conda init --all --system
+
+  - name: Activate Anaconda for the next login
+    lineinfile:
+      path: /etc/profile
+      line: "{{ item }}"
+      state: present
+    loop:
+      - export PATH=/etc/anaconda3/bin:$PATH
+      - export PIP_CACHE_DIR=/home/guest/conda_pkgs
+      - printf "pkgs_dirs:\n- /home/guest/conda_pkgs\n" > ~/.condarc
+  - name: Clean-up /etc/profile
+    lineinfile:
+      path: /etc/profile
+      regexp: "{{ item }}"
+      state: absent
+    loop:
+      - echo*
+      - printf "export*

@@ -1,0 +1,36 @@
+- name: Propagate slurm.conf
+  hosts:
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  - name: Creates /etc/slurm if does not exists
+    file:
+      path: /etc/slurm
+      state: directory
+  - name: Copy slurm.conf from central node to other nodes
+    copy:
+      src: /etc/slurm/slurm.conf
+      dest: /etc/slurm/slurm.conf
+  - name: Copy gres.conf from central node to other nodes
+    copy:
+      src: /etc/slurm/gres.conf
+      dest: /etc/slurm/gres.conf
+  - name: Ensure there is no oci.conf
+    file:
+      path: /etc/slurm/oci.conf
+      state: absent
+  - name: Ensure 'slurm' and 'users' group exists
+    group:
+      name: "{{ item }}"
+      state: present
+    loop:
+    - slurm
+    - users
+  - name: Reconfigure Slurm for changes to take effect
+    shell:
+      cmd: scontrol reconfigure
+    delegate_to: "{{ ansible_hostname }}"

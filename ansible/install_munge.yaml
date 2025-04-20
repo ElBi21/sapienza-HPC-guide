@@ -1,0 +1,34 @@
+- name: Install Munge
+  hosts: 
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  - name: Install packages
+    apt:
+      name:
+        - munge
+        - libmunge2
+        - libmunge-dev
+      state: latest
+  - name: Copy munge.key from central node to other nodes
+    copy:
+      src: ~/ansible_playbooks/munge.key
+      dest: /etc/munge/munge.key
+  - name: Set permissions for munge.key
+    shell:
+      cmd: |
+        chown -R munge: /etc/munge/ /var/log/munge/ /var/lib/munge/ /run/munge/
+        chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/
+        chmod 0755 /run/munge/
+        chmod 0700 /etc/munge/munge.key
+        chown -R munge: /etc/munge/munge.key
+  - name: Enable the munge daemon
+    systemd_service:
+      name: munge
+      enabled: true
+      state: restarted
+      daemon-reload: true

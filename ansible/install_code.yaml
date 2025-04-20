@@ -1,0 +1,36 @@
+- name: Install Visual Studio Code Tunnel on all nodes
+  hosts:
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  - name: Checks if Visual Studio Code is already installed
+    shell:
+      cmd: code --version
+    register: code_version
+    ignore_errors: true
+
+  - name: Download the installer
+    get_url:
+      url: https://code.visualstudio.com/sha/download?build=stable&os=cli-alpine-x64
+      dest: /tmp/vscode_cli.tar.gz
+      force: true
+    when: code_version.rc != 0
+  - name: Extract the content
+    unarchive:
+      src: /tmp/vscode_cli.tar.gz
+      dest: /bin
+    when: code_version.rc != 0
+  - name: Clean-up the installer
+    file:
+      path: /tmp/vscode_cli.tar.gz
+      state: absent
+      
+  - name: Checks again if Visual Studio Code has been installed
+    shell:
+      cmd: code --version
+    register: code_post
+    failed_when: code_post.rc != 0

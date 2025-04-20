@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+NODE=$1
+
+scontrol update NodeName=$NODE State=DOWN Reason="undraining"
+scontrol update NodeName=$NODE State=RESUME

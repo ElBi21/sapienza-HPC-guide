@@ -1,0 +1,51 @@
+- name: Install OpenMPI on all nodes
+  hosts:
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  # - name: Install pre-requisites
+  #   apt:
+  #     name:
+  #       - openmpi-bin
+  #   ignore_errors: true
+
+  - name: Checks if OpenMPI is already installed
+    shell:
+      cmd: ompi_info
+    register: ompi_info
+    ignore_errors: true
+  - name: Download OpenMPI
+    get_url:
+      url: https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.7.tar.bz2
+      dest: /tmp/openmpi-5.0.7.tar.bz2
+      force: true
+    when: ompi_info.rc != 0
+  - name: Unpacks OpenMPI
+    shell:
+      cmd: tar xf openmpi-5.0.7.tar.bz2
+      chdir: /tmp
+    when: ompi_info.rc != 0
+  - name: Installs OpenMPI
+    shell:
+      cmd: |
+        ./configure --prefix=/usr/local --with-slurm
+        make -j 16 all
+        make install
+      chdir: /tmp/openmpi-5.0.7
+    when: ompi_info.rc != 0
+  - name: Install post-requisites
+    apt:
+      name:
+        - hcoll 
+        - ucx
+    ignore_errors: true
+    when: ompi_info.rc != 0
+  - name: Prints ompi_infos to check whether everything is ok
+    shell:
+      cmd: ompi_info
+    register: ompi_info_post
+    failed_when: ompi_info_post.rc != 0

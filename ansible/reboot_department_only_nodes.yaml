@@ -1,0 +1,49 @@
+- name: Reboot department_only nodes
+  hosts:
+  - department_only_partition
+  become: true
+  become_user: root
+  tasks:
+  # - name: Reboot
+  #   reboot:
+  - name: Setup nvidia-smi
+    shell:
+      cmd: nvidia-smi
+    ignore_errors: true
+  - name: Set slurm user uid correctly
+    shell:
+      cmd: sudo usermod -u 1217 slurm
+    ignore_errors: true
+  - name: Set slurm user uid correctly (part 2)
+    shell:
+      cmd: sudo usermod -u 1217 slurm
+    ignore_errors: true
+  - name: Gets user id
+    shell: "id -u slurm"
+    register: uid
+  - name: Asserts that the uid is correct
+    assert:
+      that:
+      - uid.stdout == "1217"
+  - name: Disable Slurm daemon
+    systemd_service:
+      name: slurmd
+      enabled: false
+      state: stopped
+      daemon-reload: true
+    ignore_errors: true
+  - name: Restart Slurm daemon
+    systemd_service:
+      name: slurmd
+      enabled: true
+      state: restarted
+      daemon-reload: true
+  - name: Gets hostname
+    shell: hostname
+    register: hostname
+  - name: Put nodes to IDLE state
+    shell:
+      cmd: |
+        scontrol update NodeName="{{ hostname.stdout }}" State=DOWN Reason="undraining"
+        scontrol update NodeName="{{ hostname.stdout }}" State=IDLE
+  

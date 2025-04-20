@@ -9,20 +9,22 @@ The command `sinfo` can be used to monitor the state of each node, including par
 
 ```bash
 $ sinfo
-PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-admin        up   infinite      3   idle node[120-122]
-debug        up   infinite     16   idle node[103-114,116,123-124,126]
-students*    up   infinite      0    n/a
+PARTITION       AVAIL  TIMELIMIT  NODES  STATE NODELIST
+admin              up   infinite      3   idle node[120-122]
+department_only    up 7-00:00:00     18   idle node[103-105,112-114,116,123-124,126,130,132-135,137-139]
+students*          up 1-00:00:00      7   idle node[106-111,122]
 ```
 
-For a full list of the meaning of each state, [refer to Slurm's official docs](https://slurm.schedmd.com/sinfo.html#SECTION_NODE-STATE-CODES). Some of the common states are:
+??? note "Node states"
 
-- `*`: the node is presently not responding and will not be allocated any new work;
-- `ALLOCATED`: the node has been allocated to one or more jobs;
-- {`DOWN`, `DRAINED`, `FAIL`, `INVAL`}: the node is unavailable for use. Slurm can automatically place nodes in this state if some failure occurs, so inform an admin ASAP;
--  `DRAINING`: the node is currently allocated a job, but will not be allocated additional jobs;
-- {`IDLE`, `MIXED`}: the node is not allocated to any jobs and is available for use;
-- `UNKNOWN`: the Slurm controller has just started and the node's state has not yet been determined.
+      For a full list of the meaning of each state, [refer to Slurm's official docs](https://slurm.schedmd.com/sinfo.html#SECTION_NODE-STATE-CODES). Some of the common states are:
+      
+      - `*`: the node is presently not responding and will not be allocated any new work;
+      - `ALLOCATED`: the node has been allocated to one or more jobs;
+      - {`DOWN`, `DRAINED`, `FAIL`, `INVAL`}: the node is unavailable for use. Slurm can automatically place nodes in this state if some failure occurs, so inform an admin ASAP;
+      -  `DRAINING`: the node is currently allocated a job, but will not be allocated additional jobs;
+      - {`IDLE`, `MIXED`}: the node is not allocated to any jobs and is available for use;
+      - `UNKNOWN`: the Slurm controller has just started and the node's state has not yet been determined.
 
 ### Monitor the state of jobs
 The command `squeue` can be used to view information about jobs located in the Slurm scheduling queue, including job ID, partition, name, user, state, execution time, node name:
@@ -33,13 +35,15 @@ JOBID   PARTITION   NAME    USER    ST  TIME    NODES   NODELIST(REASON)
 326     debug       sleep   guest   R   0:03    1       node123
 ```
 
-The `ST` column shows the states of the jobs. For a full list of the meaning of each state, [refer to Slurm's official docs](https://slurm.schedmd.com/squeue.html#SECTION_JOB-STATE-CODES).
-Some of the common states are:
+??? note "Job states"
 
-- {`BF`, `F`, `NF`, `PR`}: the job has failed to launch or complete;
-- `OOM`: the job experienced out of memory error;
-- `R`: the job is running; 
-- `CG`: the job is in the process of completing. Some processes on some nodes may still be active.
+      The `ST` column shows the states of the jobs. For a full list of the meaning of each state, [refer to Slurm's official docs](https://slurm.schedmd.com/squeue.html#SECTION_JOB-STATE-CODES).
+      Some of the common states are:
+
+      - {`BF`, `F`, `NF`, `PR`}: the job has failed to launch or complete;
+      - `OOM`: the job experienced out of memory error;
+      - `R`: the job is running; 
+      - `CG`: the job is in the process of completing. Some processes on some nodes may still be active.
 
 ## How to submit jobs
 
@@ -57,7 +61,7 @@ node116
 
 A job with certain requirements needs all necessary resources to be specified: 
 ```bash
-srun -p <partition> --gpus=2 bash -c "echo 'It works! Here is a summary of my GPUs:'; nvidia-smi"
+$ srun -p <partition> --gpus=2 bash -c "echo 'It works! Here is a summary of my GPUs:'; nvidia-smi"
 It works! Here is a brief of my GPUs:
 Tue Mar 11 16:13:07 2025
 +-----------------------------------------------------------------------------------------+
@@ -172,10 +176,9 @@ JOBID   PARTITION   NAME    USER    ST  TIME    NODES   NODELIST(REASON)
 $ scancel 326
 $ squeue
 JOBID   PARTITION   NAME    USER    ST  TIME    NODES   NODELIST(REASON)
-326     debug       sleep   debug   CG   0:03    1       node123
 ```
 
-## Cancel all the jobs of a user
+### Cancel all the jobs of a user
 All the jobs of a user can be canceled using the `-u` or `--user` flag, by typing `scancel --user <user_id>` command:
 
 ```bash
@@ -185,5 +188,4 @@ JOBID   PARTITION   NAME    USER    ST  TIME    NODES   NODELIST(REASON)
 $ scancel --user debug
 $ squeue
 JOBID   PARTITION   NAME    USER    ST  TIME    NODES   NODELIST(REASON)
-326     debug       sleep   debug   CG   0:03    1       node123
 ```

@@ -1,24 +1,82 @@
 site_name: HPC at Computer Science Department of Sapienza Docs
-site_url: https://rom42pla.github.io/di-uniroma1-hpc-guide/
+repo_url: https://bitbucket.org/computer-science-department-at-sapienza/user-guide
+edit_uri: edit/main/docs/
 nav:
   - Home: index.md
   - User guide:
-    - How to connect to the cluster: user_guide/how_to_connect_to_the_cluster.md
-    - Slurm:
-      - What is Slurm: user_guide/what_is_slurm.md
-      - How to use Slurm: user_guide/how_to_use_slurm.md
-  - Admin guide: admin_guide.md
+    - Overview:
+      - Cluster's architecture: user_guide/cluster_architecture.md
+      - How to connect to the cluster: user_guide/how_to_connect_to_the_cluster.md
+      - Storage: user_guide/storage.md
+      - Slurm:
+        - What is Slurm: user_guide/what_is_slurm.md
+        - How to use Slurm: user_guide/how_to_use_slurm.md
+      - Containers:
+        - What are Docker and Singularity: user_guide/what_are_docker_singularity.md
+        - How to use a container: user_guide/how_to_use_containers.md
+    - How to use the cluster:
+      - How to connect to Visual Studio Code: user_guide/how_to_connect_to_code.md
+      - Running multicore C applications: user_guide/running_multicore_apps.md
+    - FAQs: user_guide/faqs.md
+  - Admin guide:
+    - Custom commands: admin_guide/custom_commands.md
+    - Slurm: admin_guide/slurm_ops.md
+    - Install apps: admin_guide/install_apps.md
+    - Install drivers: admin_guide/update_drivers.md
+    - Ansible: admin_guide/ansible.md
 theme:
   name: material
+  language: en
+  # logo: assets/images/sapienza_logo.png
+  icon:
+    repo: fontawesome/brands/bitbucket
+  palette:
+    - primary: custom
   features:
     - navigation.tabs
     - navigation.sections
     - navigation.expand
     - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.path
+    - navigation.prune
+    - navigation.top
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
 markdown_extensions:
   - attr_list
   - md_in_html
+  - pymdownx.arithmatex:
+      generic: true
   - pymdownx.blocks.caption
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+extra_css:
+  - stylesheets/extra.css
+  - https://unpkg.com/katex@0/dist/katex.min.css
+plugins:
+  - offline
+extra_javascript:
+  - javascripts/katex.js
+  - https://unpkg.com/katex@0/dist/katex.min.js
+  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js

@@ -1,0 +1,50 @@
+- name: Setup the environment
+  hosts:
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  - name: Updates apt cache
+    shell:
+      cmd: |
+        apt clean -y
+        apt update -y
+        apt upgrade -y
+        apt dist-upgrade -y
+        apt autoremove -y
+  - name: Install required packages
+    apt:
+      name:
+        - zip
+        - snapd
+        - golang-go
+      state: latest
+      autoremove: true
+  - name: Initialize nvidia-smi
+    shell:
+      cmd: nvidia-smi
+    ignore_errors: true
+  - name: Creates the /home/.shared folder
+    file:
+      path: /home/.shared
+      state: directory
+      mode: u=rwx,g=rx,o=rx
+
+
+  # SINGULARITY
+  # - name: Creates the /home/guest/.shared/singularity_cache folder
+  #   file:
+  #     path: /home/guest/.shared/singularity_cache
+  #     state: directory
+  #     mode: u=rwx,g=rwx,o=rwx
+  #     recurse: true
+  # - name: Sets the Singularity cache directory
+  #   lineinfile:
+  #     path: "/etc/environment"
+  #     state: present
+  #     regexp: "SINGULARITY_CACHEDIR="
+  #     line: ""
+

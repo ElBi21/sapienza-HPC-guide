@@ -1,0 +1,46 @@
+- name: Update the distro
+  hosts:
+  - controller_nodes
+  - login_nodes
+  - db_nodes
+  - compute_nodes
+  become: true
+  become_user: root
+  tasks:
+  - name: Keep only machines with Ubuntu < 24.04
+    assert:
+      that:
+      - ansible_distribution_version < "24.04"
+  - name: Set the default distribution to LTS
+    copy:
+      src: /etc/update-manager/release-upgrades
+      dest: /etc/update-manager/release-upgrades
+  - name: Uninstalls HTCondor
+    apt:
+      name: htcondor
+      state: absent
+      autoremove: true
+  - name: Autoremove packages
+    apt:
+      autoremove: true
+  - name: Pre-requisites parameters
+    shell:
+      cmd: |
+        sed -i 's/^Prompt=.*/Prompt=normal/' /etc/update-manager/release-upgrades
+        apt install --fix-missing --fix-broken
+        apt autoremove
+  - name: Install do-release-upgrade
+    apt:
+      name: ubuntu-release-upgrader-core
+      state: latest
+    ignore_errors: true
+  - name: Performs an update
+    shell:
+      cmd: apt update -y && apt upgrade -y
+  - name: Reboot each machine
+    reboot:
+  - name: Perform the upgrade
+    shell:
+      cmd: do-release-upgrade -f DistUpgradeViewNonInteractive
+  - name: Reboot again each machine
+    reboot:

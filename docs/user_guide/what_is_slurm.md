@@ -2,7 +2,7 @@
 Slurm is a system that helps manage and run jobs on a group of computer *nodes* called a *cluster*. 
 It makes sure that the right jobs are running on the right computers at the right time.
 
-![Slurm's architecture](assets/images/slurm_arch.png)
+![Slurm's architecture](/assets/images/slurm_arch.png)
 
 Slurm has three main purposes:
 

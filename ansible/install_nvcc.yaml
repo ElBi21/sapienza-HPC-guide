@@ -1,0 +1,28 @@
+- name: Enable nvcc
+  hosts:
+  - nodes_with_1_gpu
+  - nodes_with_2_gpus
+  become: true
+  become_user: root
+  tasks:
+  - name: Gets the lates cuda installed
+    shell:
+      cmd: ls -d /usr/local/cuda-* | sort -V | tail -1
+    register: cuda_path
+  - name: Removes trash from /etc/profile
+    lineinfile:
+      path: /etc/profile
+      state: absent
+      regexp: export .*="{.*
+  - name: Adds the first line to /etc/profile
+    lineinfile:
+      path: /etc/profile
+      state: present
+      regexp: export PATH="/usr/local/cuda-*
+      line: export PATH="{{ cuda_path.stdout }}/bin:$PATH"
+  - name: Adds the second line to /etc/profile
+    lineinfile:
+      path: /etc/profile
+      state: present
+      regexp: export LD_LIBRARY_PATH="/usr/local/cuda-*
+      line: export LD_LIBRARY_PATH="{{ cuda_path.stdout }}/lib64:$LD_LIBRARY_PATH"
