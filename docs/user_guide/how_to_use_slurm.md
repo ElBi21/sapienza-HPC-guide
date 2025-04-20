@@ -10,9 +10,11 @@ The command `sinfo` can be used to monitor the state of each node, including par
 ```bash
 $ sinfo
 PARTITION       AVAIL  TIMELIMIT  NODES  STATE NODELIST
-admin              up   infinite      3   idle node[120-122]
-department_only    up 7-00:00:00     18   idle node[103-105,112-114,116,123-124,126,130,132-135,137-139]
-students*          up 1-00:00:00      7   idle node[106-111,122]
+admin              up   infinite      1   idle node121
+department_only    up 3-00:00:00      3    mix node[132-133,135]
+department_only    up 3-00:00:00     18   idle node[103,112-114,116,120,123-124,126,130,134,137-143]
+multicore          up    6:00:00      2   idle node[106-107]
+students*          up 1-00:00:00     11   idle node[108-111,122,145-149,151]
 ```
 
 ??? note "Node states"

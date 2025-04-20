@@ -118,3 +118,18 @@ With MPI, it's possible to run multi-threaded apps with multiple nodes. Just be 
 As a guideline, we suggest that the total number of threads $t_{\text{total}}$ should always be less or equal than the number of requested nodes $n_{\text{nodes}}$ times the number of requested cores per node $t_{\text{per node}}$:
 
 $$t_{\text{total}} \leq n_{\text{nodes}} \cdot t_{\text{per node}}$$
+
+### MPI + CUDA
+
+For MPI + CUDA, the app must be compiled with `nvcc`, with the flag `-lmpi`. This means that the compilation can only happen through the sending of a job on the cluster. An example follows:
+
+```sh
+srun --partition=<partition> --gpus=1 nvcc [flags] -lmpi main.cu -o main_mpi_cuda.out
+```
+
+For running the application, `mpirun` must be used, just like a regular MPI application. An example follows:
+
+```sh
+srun --partition=<partition> --gpus=<num_gpus> --cpus-per-task=1 --nodes=<num_nodes> \
+    mpirun -np <num_processes> --oversubscribe main_mpi_cuda.out [app_args]
+```
